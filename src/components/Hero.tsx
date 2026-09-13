@@ -19,6 +19,9 @@ export default function Hero() {
           </p>
 
           <div className="mt-8 flex flex-wrap gap-4">
+            <Link href="/cadastro" className="rounded-lg bg-[#0A2E5D] px-6 py-3 font-semibold text-white transition hover:bg-[#082448]">
+              Criar conta e conhecer a loja
+            </Link>
             <Link
               href="/orcamento"
               className="rounded-lg bg-[#E53935] px-6 py-3 font-semibold text-white transition hover:bg-[#C62828]"
