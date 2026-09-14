@@ -4,4 +4,6 @@ export const products = [
   { slug: "estatua-personalizada", title: "Estátua personalizada", category: "Decoração", image: "/produtos/produto-03.jpeg", description: "Conheça uma das estátuas produzidas em impressão 3D pelo Clube WPI3D." },
 ] as const;
 
+export type Product = (typeof products)[number];
+
 export function findProduct(slug: string) { return products.find((product) => product.slug === slug); }

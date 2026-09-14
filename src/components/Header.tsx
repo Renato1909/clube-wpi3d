@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { currentUser } from "@/lib/supabase/server";
 import { signOut } from "@/app/actions/auth";
+import CartLink from "@/components/CartLink";
 
 export default async function Header() {
   const user = await currentUser();
@@ -41,6 +42,7 @@ export default async function Header() {
           </Link>
 
           <Link href={user ? "/minha-conta" : "/login"} className="text-sm font-semibold text-[#0A2E5D] hover:underline">{user ? "Minha conta" : "Entrar"}</Link>
+          {user && <CartLink />}
           {!user && <Link href="/cadastro" className="text-sm font-semibold text-[#0A2E5D] hover:underline">Criar conta</Link>}
           {user && <form action={signOut}><button className="text-sm text-gray-600 hover:underline">Sair</button></form>}
 
@@ -57,6 +59,7 @@ export default async function Header() {
             <Link href="/" className="rounded-lg px-3 py-3 hover:bg-gray-50">Início</Link>
             <Link href="/loja" className="rounded-lg px-3 py-3 hover:bg-gray-50">Loja</Link>
             <Link href={user ? "/minha-conta" : "/login"} className="rounded-lg px-3 py-3 hover:bg-gray-50">{user ? "Minha conta" : "Entrar"}</Link>
+            {user && <CartLink mobile />}
             {!user && <Link href="/cadastro" className="rounded-lg px-3 py-3 hover:bg-gray-50">Criar conta</Link>}
             <Link href="/orcamento" className="rounded-lg bg-[#E53935] px-3 py-3 font-semibold text-white">Solicitar orçamento</Link>
             {user && <form action={signOut}><button className="w-full rounded-lg px-3 py-3 text-left hover:bg-gray-50">Sair</button></form>}
