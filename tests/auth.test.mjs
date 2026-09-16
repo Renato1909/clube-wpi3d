@@ -6,7 +6,7 @@ function form(values) { const data = new FormData(); for (const [key, value] of 
 
 test("redirects reject external, protocol-relative, encoded and unexpected destinations", () => {
   for (const value of ["https://example.com", "//example.com", "/\\example.com", "/%2f%2fexample.com", "/admin", null, ["/minha-conta"]]) assert.equal(safeDestination(value), "/loja");
-  for (const value of ["/loja", "/minha-conta", "/orcamento", "/redefinir-senha"]) assert.equal(safeDestination(value), value);
+  for (const value of ["/loja", "/minha-conta", "/orcamento", "/redefinir-senha", "/carrinho"]) assert.equal(safeDestination(value), value);
 });
 
 test("signup validates name, email, password and confirmation on the server", () => {

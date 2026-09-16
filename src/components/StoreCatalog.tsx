@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { products } from "@/lib/products";
+import AddToCartButton from "@/components/AddToCartButton";
 
 function normalize(value: string) { return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
 
@@ -24,8 +25,9 @@ export default function StoreCatalog({ preview = false }: { preview?: boolean })
       {filtered.map((product) => <article key={product.slug} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <Link href={`${preview ? "/previa-loja" : "/loja"}/${product.slug}`} className="group block">
           <div className="relative aspect-square bg-[#EEF1F5]"><Image src={product.image} alt={product.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-contain p-5 transition group-hover:scale-105" /></div>
-          <div className="p-5"><p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{product.category}</p><h3 className="mt-2 text-xl font-bold text-[#0A2E5D]">{product.title}</h3><p className="mt-4 font-semibold text-gray-700">Preço a definir</p><p className="mt-1 text-xs text-gray-500">Compra disponível em breve</p><span className="mt-5 block rounded-lg border border-[#0A2E5D] px-4 py-2.5 text-center text-sm font-semibold text-[#0A2E5D] transition group-hover:bg-[#0A2E5D] group-hover:text-white">Ver detalhes →</span></div>
+          <div className="px-5 pt-5"><p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{product.category}</p><h3 className="mt-2 text-xl font-bold text-[#0A2E5D]">{product.title}</h3><p className="mt-4 font-semibold text-gray-700">Preço a definir</p><span className="mt-4 block text-sm font-semibold text-[#0A2E5D] group-hover:underline">Ver detalhes →</span></div>
         </Link>
+        <div className="p-5">{preview ? <p className="text-center text-xs text-gray-500">Compra disponível após o cadastro</p> : <AddToCartButton slug={product.slug} compact />}</div>
       </article>)}
     </div> : <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center"><h3 className="font-bold text-[#0A2E5D]">Nenhum produto encontrado</h3><p className="mt-2 text-sm text-gray-600">Tente outra busca ou veja todas as categorias.</p><button onClick={() => { setQuery(""); setCategory("Todos"); }} className="mt-5 font-semibold text-[#0A2E5D] underline">Limpar filtros</button></div>}
   </section>;

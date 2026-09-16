@@ -3,7 +3,7 @@ export type AuthState = { error?: string; message?: string };
 
 // Only known destinations may be used after authentication.
 export function safeDestination(value: unknown): string {
-  return typeof value === "string" && ["/loja", "/minha-conta", "/orcamento", "/redefinir-senha"].includes(value) ? value : "/loja";
+  return typeof value === "string" && ["/loja", "/minha-conta", "/orcamento", "/redefinir-senha", "/carrinho"].includes(value) ? value : "/loja";
 }
 
 export function validateAuth(mode: AuthMode, data: FormData): string | null {

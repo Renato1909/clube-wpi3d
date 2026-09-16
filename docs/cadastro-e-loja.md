@@ -4,7 +4,7 @@
 
 Home → Criar conta → Confirmar e-mail → Loja.
 
-Quem já tem cadastro usa `/login`. A conta autenticada pode abrir `/loja`, os detalhes dos produtos, `/minha-conta` e `/orcamento`. O servidor verifica a identidade pelo Supabase antes de renderizar as páginas protegidas. A sessão usa cookies e é renovada pelo `src/proxy.ts`. Os destinos após login são limitados a rotas conhecidas.
+Quem já tem cadastro usa `/login`. A conta autenticada pode abrir `/loja`, os detalhes dos produtos, `/carrinho`, `/minha-conta` e `/orcamento`. O servidor verifica a identidade pelo Supabase antes de renderizar as páginas protegidas. A sessão usa cookies e é renovada pelo `src/proxy.ts`. Os destinos após login são limitados a rotas conhecidas.
 
 Também foram preparados recuperação de senha, definição de nova senha, confirmação por link e encerramento da sessão neste navegador. A senha é processada pelo Supabase Auth; não é salva em arquivos, tabelas próprias ou localStorage.
 
@@ -12,7 +12,7 @@ Também foram preparados recuperação de senha, definição de nova senha, conf
 
 Sem as variáveis do Supabase, os formulários de autenticação ficam desabilitados. Não há conta ou login fictício. `/loja` e `/minha-conta` encaminham ao login. `/previa-loja` permite revisar o catálogo com um aviso explícito de demonstração; quando o Supabase for configurado, essa rota passa a encaminhar para a loja protegida.
 
-As três fotos existentes compõem um catálogo provisório com busca, categorias e detalhes. Nomes, medidas, materiais, disponibilidade e preços precisam ser confirmados pelo proprietário. Não há carrinho, pedido real ou pagamento. Os preços aparecem como “A definir”; a compra está desabilitada. O orçamento continua sendo uma demonstração sem envio ou armazenamento, mas recebe a referência de uma peça selecionada e os dados de nome/e-mail do cliente autenticado.
+As três fotos existentes compõem um catálogo provisório com busca, categorias e detalhes. Nomes, medidas, materiais, disponibilidade e preços precisam ser confirmados pelo proprietário. O cliente autenticado já pode adicionar peças ao carrinho, alterar quantidades, remover itens e manter a seleção salva neste navegador. Como os preços ainda não foram definidos, subtotal e finalização permanecem indisponíveis. O carrinho oferece acesso ao orçamento personalizado enquanto o catálogo definitivo e o pagamento não são liberados.
 
 ## Conectar o Supabase
 
