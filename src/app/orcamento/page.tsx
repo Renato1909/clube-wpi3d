@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import QuoteForm from "@/components/QuoteForm";
 import { supabaseConfig } from "@/lib/supabase/config";
 import { requireUser } from "@/lib/supabase/server";
-import { findProduct } from "@/lib/products";
+import { getProductBySlug } from "@/lib/products-server";
 
 export const metadata: Metadata = {
   title: "Solicite seu orçamento | Clube WPI3D",
@@ -14,7 +14,8 @@ export const metadata: Metadata = {
 
 export default async function OrcamentoPage({ searchParams }: { searchParams: Promise<{ produto?: string }> }) {
   const user = supabaseConfig() ? await requireUser("/orcamento") : null;
-  const product = findProduct((await searchParams).produto ?? "");
+  const productSlug = (await searchParams).produto ?? "";
+  const product = productSlug ? await getProductBySlug(productSlug) : undefined;
   return (
     <>
       <Header />
