@@ -41,9 +41,13 @@ create table if not exists public.quotes (
   notes text check (notes is null or char_length(notes) <= 3000),
   status text not null default 'recebido'
     check (status in ('recebido', 'em_analise', 'aguardando_cliente', 'aprovado', 'recusado', 'concluido')),
+  submission_complete boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.quotes
+  add column if not exists submission_complete boolean not null default false;
 
 create table if not exists public.quote_files (
   id bigint generated always as identity primary key,
@@ -160,6 +164,13 @@ on public.quotes for delete
 to authenticated
 using ((select auth.uid()) = user_id);
 
+drop policy if exists "quotes_update_submission_own" on public.quotes;
+create policy "quotes_update_submission_own"
+on public.quotes for update
+to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
+
 drop policy if exists "quote_files_select_own" on public.quote_files;
 create policy "quote_files_select_own"
 on public.quote_files for select
@@ -190,6 +201,7 @@ grant usage on schema public to authenticated;
 grant select on public.profiles to authenticated;
 grant update (full_name, phone) on public.profiles to authenticated;
 grant select, insert, delete on public.quotes to authenticated;
+grant update (submission_complete) on public.quotes to authenticated;
 grant select, insert, delete on public.quote_files to authenticated;
 grant usage, select on sequence public.quotes_id_seq to authenticated;
 grant usage, select on sequence public.quote_files_id_seq to authenticated;
