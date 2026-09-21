@@ -22,7 +22,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const client = await createClient();
   const { data: quotes, error } = client ? await client
     .from("quotes")
-    .select("id, customer_name, customer_email, customer_phone, description, quantity, material, color, desired_date, notes, status, created_at, quote_files(id, original_name, storage_path, size_bytes)")
+    .select("id, customer_name, customer_email, customer_phone, description, quantity, material, color, desired_date, notes, status, submission_complete, created_at, quote_files(id, original_name, storage_path, size_bytes)")
     .order("created_at", { ascending: false })
     .limit(100) : { data: null, error: new Error("Supabase indisponível") };
 
@@ -33,7 +33,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Não foi possível carregar os orçamentos.</p>}
     {!error && quotes?.length === 0 && <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center text-gray-600">Nenhum orçamento recebido até o momento.</div>}
     <div className="space-y-5">{quotes?.map((quote) => <article key={quote.id} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-7">
-      <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-sm text-gray-500">Solicitação nº {quote.id}</p><h2 className="mt-1 text-xl font-bold text-[#0A2E5D]">{quote.customer_name}</h2><p className="mt-1 text-sm text-gray-600">{quote.customer_email} · {quote.customer_phone}</p></div><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0A2E5D]">{statusLabels[quote.status] ?? quote.status}</span></div>
+      <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-sm text-gray-500">Solicitação nº {quote.id}</p><h2 className="mt-1 text-xl font-bold text-[#0A2E5D]">{quote.customer_name}</h2><p className="mt-1 text-sm text-gray-600">{quote.customer_email} · {quote.customer_phone}</p></div><div className="flex flex-wrap gap-2"><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0A2E5D]">{statusLabels[quote.status] ?? quote.status}</span>{!quote.submission_complete && <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">Envio incompleto</span>}</div></div>
       <p className="mt-5 whitespace-pre-wrap text-sm leading-6 text-gray-700">{quote.description}</p>
       <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4"><div><dt className="text-gray-500">Quantidade</dt><dd className="font-semibold">{quote.quantity}</dd></div><div><dt className="text-gray-500">Material</dt><dd className="font-semibold">{quote.material}</dd></div><div><dt className="text-gray-500">Cor</dt><dd className="font-semibold">{quote.color || "Não informada"}</dd></div><div><dt className="text-gray-500">Prazo desejado</dt><dd className="font-semibold">{quote.desired_date || "Não informado"}</dd></div></dl>
       {quote.notes && <p className="mt-4 rounded-xl bg-gray-50 p-4 text-sm text-gray-700"><strong>Observações:</strong> {quote.notes}</p>}
