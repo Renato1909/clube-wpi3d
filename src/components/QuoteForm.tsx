@@ -91,6 +91,7 @@ export default function QuoteForm({ initialDescription = "", initialName = "", i
       material: value("material"),
       desired_date: optional("prazo"),
       notes: optional("observacoes"),
+      submission_complete: files.length === 0,
     }).select("id").single();
 
     if (quoteError || !quote) {
@@ -123,6 +124,21 @@ export default function QuoteForm({ initialDescription = "", initialName = "", i
         size_bytes: file.size,
       })));
       attachmentsFailed = Boolean(metadataError);
+    }
+
+    if (!attachmentsFailed && files.length > 0) {
+      const { error: completionError } = await client
+        .from("quotes")
+        .update({ submission_complete: true })
+        .eq("id", quote.id)
+        .eq("user_id", authData.user.id);
+
+      if (completionError) {
+        setSubmitting(false);
+        setSubmitError("O orçamento e os arquivos foram enviados, mas não foi possível concluir a confirmação automática. Não envie novamente; entre em contato com a equipe.");
+        result.current?.focus();
+        return;
+      }
     }
 
     if (attachmentsFailed && uploadedPaths.length > 0) {
