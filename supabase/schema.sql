@@ -154,6 +154,12 @@ on public.quotes for insert
 to authenticated
 with check ((select auth.uid()) = user_id and status = 'recebido');
 
+drop policy if exists "quotes_delete_own" on public.quotes;
+create policy "quotes_delete_own"
+on public.quotes for delete
+to authenticated
+using ((select auth.uid()) = user_id);
+
 drop policy if exists "quote_files_select_own" on public.quote_files;
 create policy "quote_files_select_own"
 on public.quote_files for select
