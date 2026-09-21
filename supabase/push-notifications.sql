@@ -48,3 +48,4 @@ using ((select auth.uid()) = user_id);
 revoke all on public.push_tokens from anon;
 grant select, insert, update, delete on public.push_tokens to authenticated;
 grant usage, select on sequence public.push_tokens_id_seq to authenticated;
+grant select on public.push_tokens to service_role;
