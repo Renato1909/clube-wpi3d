@@ -1,33 +1,60 @@
 # Notificações operacionais do Clube WPI3D
 
-Este fluxo envia push notifications para os dispositivos dos usuários que possuem `profiles.role = 'admin'`.
+O projeto envia push notifications para os dispositivos dos usuários com `profiles.role = 'admin'`.
 
 ## Eventos
 
-- Inserção em `profiles`: "Novo cliente cadastrado".
-- Inserção em `quotes`: "Novo pedido #ID".
+- Inserção em `profiles`: **Novo cliente cadastrado**.
+- Inserção em `quotes`: **Novo pedido #ID**.
+- Alteração de status de orçamento: notificação enviada ao cliente pela função `notify-status-change`.
 
-As notificações de alteração de status dos pedidos continuam sendo tratadas pela função `notify-status-change`.
+## Arquitetura
 
-## Configuração no Supabase
+```
+profiles/quotes INSERT
+        ↓
+Postgres trigger
+        ↓
+pg_net (assíncrono)
+        ↓
+notify-business-event
+        ↓
+Expo Push Service
+        ↓
+celular(es) do administrador
+```
 
-1. Faça deploy da Edge Function `notify-business-event` a partir de `supabase/functions/notify-business-event/index.ts`.
-2. Confirme que `SUPABASE_SERVICE_ROLE_KEY` está configurada como secret da função.
-3. Em Database > Webhooks, crie dois webhooks HTTP POST:
-   - `profiles` + evento `INSERT` → URL da função `notify-business-event`.
-   - `quotes` + evento `INSERT` → URL da função `notify-business-event`.
-4. Em cada webhook, envie `Content-Type: application/json` e o cabeçalho de autorização com a chave de serviço usada pela função.
-5. Confirme que pelo menos uma conta administrativa foi promovida em `profiles.role = 'admin'`.
-6. Faça login dessa conta no aplicativo móvel ao menos uma vez para registrar o token em `push_tokens`.
+A função `notify-business-event` usa um segredo aleatório mantido somente no banco e validado por cabeçalho interno. A chave de serviço nunca é armazenada no aplicativo móvel nem no repositório.
 
-Database Webhooks são assíncronos e são executados após a alteração da linha. O Supabase usa `pg_net` por baixo dessa funcionalidade.
+## Configuração do banco
 
-## Teste ponta a ponta
+O fluxo já foi aplicado ao projeto Supabase:
 
-1. No celular do administrador, mantenha notificações permitidas.
-2. Crie uma nova conta de cliente.
-3. Verifique a notificação "Novo cliente cadastrado".
-4. Com um cliente autenticado, envie um novo pedido.
-5. Verifique a notificação "Novo pedido #ID".
+- extensão `pg_net`;
+- tabela `push_tokens`;
+- tabela protegida `business_webhook_secrets`;
+- triggers `business_webhook_profiles_insert` e `business_webhook_quotes_insert`.
 
-Para Android, o app móvel precisa de um development build ou build de produção para push remoto; Expo Go não cobre esse fluxo no Android a partir do SDK 53.
+A configuração reproduzível está em `supabase/business-push-notifications.sql`.
+
+## Operação
+
+O administrador precisa entrar no aplicativo móvel em um aparelho físico e aceitar as notificações. O aplicativo registra o Expo Push Token em `push_tokens`.
+
+É possível registrar vários aparelhos para o mesmo administrador. Todos receberão os eventos.
+
+## Teste
+
+1. Instale um development build ou build de produção do app.
+2. Faça login com uma conta cujo `profiles.role` seja `admin`.
+3. Confirme que o dispositivo aparece em `push_tokens`.
+4. Cadastre um novo cliente.
+5. Confirme a notificação **Novo cliente cadastrado**.
+6. Crie um pedido de cliente.
+7. Confirme a notificação **Novo pedido #ID**.
+
+O teste de integração do trigger de `quotes` já foi executado no ambiente Supabase e a Edge Function respondeu HTTP 200; naquele teste o envio foi ignorado porque ainda não havia token push de administrador.
+
+## Android
+
+O app móvel cria o canal padrão de notificações e exibe notificações também quando está em primeiro plano. O push remoto deve ser testado em aparelho físico com development build ou build de produção.
