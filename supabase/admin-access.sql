@@ -29,8 +29,11 @@ create policy "quotes_select_own_or_admin" on public.quotes for select to authen
 using ((select auth.uid()) = user_id or (select private.is_admin()));
 
 drop policy if exists "quotes_update_admin" on public.quotes;
-create policy "quotes_update_admin" on public.quotes for update to authenticated
-using ((select private.is_admin())) with check ((select private.is_admin()));
+drop policy if exists "quotes_update_submission_own" on public.quotes;
+drop policy if exists "quotes_update_own_or_admin" on public.quotes;
+create policy "quotes_update_own_or_admin" on public.quotes for update to authenticated
+using ((select auth.uid()) = user_id or (select private.is_admin()))
+with check ((select auth.uid()) = user_id or (select private.is_admin()));
 
 drop policy if exists "quote_files_select_own" on public.quote_files;
 drop policy if exists "quote_files_select_admin" on public.quote_files;

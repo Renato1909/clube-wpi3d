@@ -71,4 +71,15 @@ drop trigger if exists business_webhook_quotes_insert on public.quotes;
 create trigger business_webhook_quotes_insert
 after insert on public.quotes
 for each row
+when (new.submission_complete is true)
+execute function private.queue_business_event_webhook();
+
+drop trigger if exists business_webhook_quotes_ready_update on public.quotes;
+create trigger business_webhook_quotes_ready_update
+after update of submission_complete on public.quotes
+for each row
+when (
+  new.submission_complete is true
+  and old.submission_complete is distinct from true
+)
 execute function private.queue_business_event_webhook();

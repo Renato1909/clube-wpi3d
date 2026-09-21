@@ -58,6 +58,30 @@ Deno.serve(async (request) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
+  let readyQuote: { id: number; customer_name: string } | null = null;
+
+  if (payload.table === "quotes") {
+    const quoteId = asPositiveInteger(payload.record.id);
+    if (!quoteId) return json({ error: "quote_id_missing" }, 400);
+
+    const { data: quote, error: quoteError } = await supabase
+      .from("quotes")
+      .select("id,customer_name,submission_complete")
+      .eq("id", quoteId)
+      .maybeSingle();
+
+    if (quoteError) return json({ error: "quote_lookup_failed" }, 500);
+
+    if (!quote || quote.submission_complete !== true) {
+      return json({ sent: 0, skipped: true, reason: "quote_not_ready" });
+    }
+
+    readyQuote = {
+      id: quote.id,
+      customer_name: quote.customer_name,
+    };
+  }
+
   const { data: admins, error: adminError } = await supabase
     .from("profiles")
     .select("id")
@@ -101,17 +125,13 @@ Deno.serve(async (request) => {
       profileId,
     };
   } else {
-    const quoteId = asPositiveInteger(payload.record.id);
-    if (!quoteId) return json({ error: "quote_id_missing" }, 400);
+    if (!readyQuote) return json({ error: "quote_not_ready" }, 409);
 
-    const customerName =
-      String(payload.record.customer_name ?? "Um cliente").trim() || "Um cliente";
-
-    title = `Novo pedido #${quoteId}`;
-    body = `${customerName} enviou um novo pedido.`;
+    title = `Novo pedido #${readyQuote.id}`;
+    body = `${readyQuote.customer_name} enviou um novo pedido.`;
     notificationData = {
       type: "new_quote",
-      quoteId,
+      quoteId: readyQuote.id,
     };
   }
 
