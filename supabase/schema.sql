@@ -189,7 +189,7 @@ revoke all on public.profiles, public.quotes, public.quote_files from anon;
 grant usage on schema public to authenticated;
 grant select on public.profiles to authenticated;
 grant update (full_name, phone) on public.profiles to authenticated;
-grant select, insert on public.quotes to authenticated;
+grant select, insert, delete on public.quotes to authenticated;
 grant select, insert, delete on public.quote_files to authenticated;
 grant usage, select on sequence public.quotes_id_seq to authenticated;
 grant usage, select on sequence public.quote_files_id_seq to authenticated;
