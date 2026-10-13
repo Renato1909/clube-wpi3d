@@ -1,14 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.116.0";
 
-type WebhookRecord = Record<string, unknown>;
-
-type WebhookPayload = {
-  type?: string;
-  schema?: string;
-  table?: string;
-  record?: WebhookRecord | null;
-  old_record?: WebhookRecord | null;
-};
+import { matchesWebhookSecret, parseBusinessEvent } from "./payload.ts";
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -33,30 +25,30 @@ Deno.serve(async (request) => {
     return json({ error: "function_not_configured" }, 500);
   }
 
-  const authorization = request.headers.get("Authorization") ?? "";
-  if (authorization !== `Bearer ${serviceRoleKey}`) {
-    return json({ error: "unauthorized" }, 401);
-  }
-
-  let payload: WebhookPayload;
-  try {
-    payload = await request.json();
-  } catch {
-    return json({ error: "invalid_json" }, 400);
-  }
-
-  if (
-    payload.type !== "INSERT" ||
-    payload.schema !== "public" ||
-    !payload.record ||
-    !["profiles", "quotes"].includes(payload.table ?? "")
-  ) {
-    return json({ error: "invalid_payload" }, 400);
-  }
+  const suppliedSecret = request.headers.get("x-clube-wpi3d-webhook-secret") ?? "";
+  if (!/^[a-f0-9]{64}$/.test(suppliedSecret)) return json({ error: "unauthorized" }, 401);
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+  const { data: secretRow, error: secretError } = await supabase
+    .from("business_webhook_secrets")
+    .select("secret")
+    .eq("key", "notify-business-event")
+    .maybeSingle();
+  if (secretError || !secretRow) return json({ error: "webhook_not_configured" }, 500);
+  if (!matchesWebhookSecret(suppliedSecret, secretRow.secret)) {
+    return json({ error: "unauthorized" }, 401);
+  }
+
+  let webhookBody: unknown;
+  try {
+    webhookBody = await request.json();
+  } catch {
+    return json({ error: "invalid_json" }, 400);
+  }
+  const payload = parseBusinessEvent(webhookBody);
+  if (!payload) return json({ error: "invalid_payload" }, 400);
 
   let readyQuote: { id: number; customer_name: string } | null = null;
 
@@ -156,3 +148,4 @@ Deno.serve(async (request) => {
   const result = await response.json();
   return json({ sent: messages.length, result });
 });
+

@@ -196,7 +196,7 @@ on public.quote_files for delete
 to authenticated
 using ((select auth.uid()) = user_id);
 
-revoke all on public.profiles, public.quotes, public.quote_files from anon;
+revoke all on public.profiles, public.quotes, public.quote_files from public, anon, authenticated;
 grant usage on schema public to authenticated;
 grant select on public.profiles to authenticated;
 grant update (full_name, phone) on public.profiles to authenticated;
@@ -238,3 +238,4 @@ using (
   bucket_id = 'quote-files'
   and (storage.foldername(name))[1] = (select auth.uid())::text
 );
+

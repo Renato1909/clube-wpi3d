@@ -1,0 +1,14 @@
+{
+  "name": "clube-wpi3d-backend-contracts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "node check-edge.mjs",
+    "test": "npm run typecheck && node --test *.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.14",
+    "@supabase/supabase-js": "2.116.0",
+    "typescript": "~5.9.2"
+  }
+}
