@@ -43,10 +43,13 @@ paths = [
   '''\.env\.example$''',
   '''\.dev\.vars\.example$''',
   '''\.example$''',
+  '''\.gitleaks\.toml$''',
+  '''tools/secret-scan\.mjs$''',
+  '''hooks/pre-push$''',
 ]
 regexes = [
   '''Segura123|Errada123|SenhaNova2|SenhaAntiga1|SenhaErrada1|OutraSenha3|OutraNova3|Excluir123|Password123|Portfolio123''',
-  '''CANARY|_EXAMPLE|EXAMPLE_KEY|AKIAIOSFODNN7EXAMPLE|AKIA1234567890ABCDEF''',
+  '''CANARY|AKIAIOSFODNN7EXAMPLE''',
   '''brevo_test_only|substitua_pela_chave|ExponentPushToken\[test\]''',
   '''(access|refresh)-token|['"]token['"]\s*:\s*['"][Aa]?['"]''',
   '''images\.unsplash\.com''',

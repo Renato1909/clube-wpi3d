@@ -15,6 +15,8 @@ const HIGH_RISK = [
 ];
 
 const ENTROPY_EXCLUDE = /(node_modules|package-lock|go\.sum|\.lock$|\.lock\/|composer\.lock|Cargo\.lock|poetry\.lock|Pipfile\.lock|\.min\.|\.map$|\.pdf$|\.docx$|\.svg$|\.snap$|__snapshots__|dist\/|build\/)/;
+// Arquivos que contem as proprias assinaturas de deteccao nao sao credenciais.
+const SIGNATURE_FILES = /(\.gitleaks\.toml|tools\/secret-scan\.mjs|hooks\/pre-push)$/;
 const ENTROPY_ALLOW = /(Segura123|Errada123|SenhaNova2|SenhaAntiga1|SenhaErrada1|OutraSenha3|OutraNova3|Excluir123|Password123|Portfolio123|CANARY|EXAMPLE|brevo_test_only|ExponentPushToken|unsplash|example\.(com|test))/;
 const MIN_TOKEN_LEN = 24;
 const ENTROPY_THRESHOLD = 4.3;
@@ -96,6 +98,7 @@ while (pos < buf.length) {
   const raw = buf.subarray(nl + 1, nl + 1 + size);
   pos = nl + 1 + size + 1;
   const path = pathOf.get(header[0]) ?? '(desconhecido)';
+  if (SIGNATURE_FILES.test(path)) continue;
   if (ENTROPY_EXCLUDE.test(path) || raw.includes(0) || size > 3_000_000) continue;
   scanned++;
   const content = raw.toString('utf8');
